@@ -8,6 +8,7 @@ const LENGTH_MAP = {
   short:  { target: 300,  min: 250,  max: 380,  minWords: 45,  maxWords: 65,  maxTokens: 512  },
   medium: { target: 600,  min: 500,  max: 720,  minWords: 90,  maxWords: 125, maxTokens: 900  },
   long:   { target: 1000, min: 850,  max: 1150, minWords: 155, maxWords: 200, maxTokens: 1600 },
+  xl:     { target: 2500, min: 2200, max: 2800, minWords: 380, maxWords: 460, maxTokens: 3200 },
 };
 
 const TYPE_INSTRUCTIONS: Record<string, string> = {

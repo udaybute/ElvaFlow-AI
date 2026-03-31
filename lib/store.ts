@@ -89,7 +89,7 @@ function loadSavedHashtags(): string[] {
   } catch { return []; }
 }
 
-const LENGTH_PROGRESS_TARGET: Record<string, number> = { short: 450, medium: 800, long: 1300 };
+const LENGTH_PROGRESS_TARGET: Record<string, number> = { short: 450, medium: 800, long: 1300, xl: 3000 };
 
 function estimateProgress(text: string, length: PostLength): number {
   const target = LENGTH_PROGRESS_TARGET[length] ?? 800;

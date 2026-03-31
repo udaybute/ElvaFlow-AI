@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -rn \"see more\\\\|see-more\" c:UbElvaFlow-AIpostflow-ai --include=*.tsx --include=*.ts --include=*.jsx --include=*.js)",
+      "Bash(ls -la c:/Ub/ElvaFlow-AI/postflow-ai/*.ts)"
+    ]
+  }
+}

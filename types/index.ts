@@ -13,7 +13,7 @@ export type PostTone =
   | 'storytelling'
   | 'analytical';
 
-export type PostLength = 'short' | 'medium' | 'long';
+export type PostLength = 'short' | 'medium' | 'long' | 'xl';
 
 export type ImageStyle = 'professional' | 'minimal' | 'colorful' | 'abstract';
 

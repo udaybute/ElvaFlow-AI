@@ -21,6 +21,7 @@ export const POST_LENGTHS: { value: PostLength; label: string; chars: number }[]
   { value: 'short', label: 'Short', chars: 300 },
   { value: 'medium', label: 'Medium', chars: 600 },
   { value: 'long', label: 'Long', chars: 1000 },
+  { value: 'xl', label: 'XL', chars: 2500 },
 ];
 
 export const IMAGE_STYLES: { value: ImageStyle; label: string }[] = [
