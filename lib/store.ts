@@ -89,9 +89,11 @@ function loadSavedHashtags(): string[] {
   } catch { return []; }
 }
 
-// Estimate progress based on accumulated text length (typical post ~500-1000 chars)
-function estimateProgress(text: string): number {
-  return Math.min(Math.round((text.length / 900) * 100), 95);
+const LENGTH_PROGRESS_TARGET: Record<string, number> = { short: 450, medium: 800, long: 1300 };
+
+function estimateProgress(text: string, length: PostLength): number {
+  const target = LENGTH_PROGRESS_TARGET[length] ?? 800;
+  return Math.min(Math.round((text.length / target) * 100), 95);
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -224,7 +226,7 @@ export const useAppStore = create<AppState>((set, get) => ({
               const sc = [...state.streamingContents] as [string, string, string];
               const vp = [...state.variationProgress] as [number, number, number];
               sc[idx] = accumulated[idx];
-              vp[idx] = estimateProgress(accumulated[idx]);
+              vp[idx] = estimateProgress(accumulated[idx], length);
               return { streamingContents: sc, variationProgress: vp };
             });
           }

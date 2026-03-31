@@ -4,7 +4,11 @@ import { GeneratePostRequest } from '@/types';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-const LENGTH_MAP = { short: 300, medium: 600, long: 1000 };
+const LENGTH_MAP = {
+  short:  { target: 300,  min: 250,  max: 380,  maxTokens: 512  },
+  medium: { target: 600,  min: 500,  max: 720,  maxTokens: 900  },
+  long:   { target: 1000, min: 850,  max: 1150, maxTokens: 1600 },
+};
 
 const TYPE_INSTRUCTIONS: Record<string, string> = {
   'thought-leadership': 'Share an expert insight that positions the author as an industry leader. Open with a bold, counterintuitive statement.',
@@ -30,21 +34,24 @@ const VARIATION_ANGLES = [
 ];
 
 function buildPrompt(topic: string, postType: string, tone: string, length: string, variationAngle: string) {
-  const charLimit = LENGTH_MAP[length as keyof typeof LENGTH_MAP] ?? 600;
+  const cfg = LENGTH_MAP[length as keyof typeof LENGTH_MAP] ?? LENGTH_MAP.medium;
   return `You are an expert LinkedIn content creator. Generate a high-quality LinkedIn post.
 
 Topic: ${topic}
 Post Type: ${postType} - ${TYPE_INSTRUCTIONS[postType] ?? ''}
 Tone: ${tone} - ${TONE_INSTRUCTIONS[tone] ?? ''}
-Target Length: approximately ${charLimit} characters (NOT words)
 Angle for this variation: ${variationAngle}
+
+LENGTH REQUIREMENT (critical — this is characters, not words):
+- Write between ${cfg.min} and ${cfg.max} characters for the post body
+- Target is ${cfg.target} characters — do not write significantly less
+- Count your output carefully; pad with detail if needed to reach the minimum
 
 Requirements:
 - Write ONLY the post content (no meta-commentary, no preamble)
 - Use line breaks strategically for readability
 - Make the opening line a hook that stops the scroll
 - End with a clear call-to-action
-- Stay within ${charLimit} characters
 
 After the post, on a new line add exactly:
 HASHTAGS: #tag1 #tag2 #tag3 #tag4 #tag5
@@ -71,6 +78,7 @@ export async function POST(request: NextRequest) {
     const angle = VARIATION_ANGLES[variationIndex ?? 0] ?? VARIATION_ANGLES[0];
     const prompt = buildPrompt(topic, postType, tone, length, angle);
     const temperature = 0.85 + (variationIndex ?? 0) * 0.05;
+    const maxTokens = (LENGTH_MAP[length as keyof typeof LENGTH_MAP] ?? LENGTH_MAP.medium).maxTokens;
 
     // ── Streaming mode ──────────────────────────────────────────────────────
     if (wantStream) {
@@ -78,7 +86,7 @@ export async function POST(request: NextRequest) {
         model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'user', content: prompt }],
         temperature,
-        max_tokens: 1024,
+        max_tokens: maxTokens,
         stream: true,
       });
 
@@ -107,7 +115,7 @@ export async function POST(request: NextRequest) {
       model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'user', content: prompt }],
       temperature,
-      max_tokens: 1024,
+      max_tokens: maxTokens,
     });
 
     const raw = completion.choices[0]?.message?.content ?? '';

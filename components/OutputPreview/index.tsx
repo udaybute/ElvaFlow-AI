@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Trash2, Download, Pencil, Check, X, Hash, ImageDown } from 'lucide-react';
 import { toast } from 'sonner';
@@ -282,6 +283,8 @@ export function OutputPreview({
 // LinkedIn "see more" fold at ~210 chars
 function LinkedInContent({ content }: { content: string }) {
   const FOLD = 210;
+  const [expanded, setExpanded] = useState(false);
+
   if (content.length <= FOLD) {
     return <p className="text-sm text-white/80 whitespace-pre-line leading-relaxed">{content}</p>;
   }
@@ -291,12 +294,20 @@ function LinkedInContent({ content }: { content: string }) {
 
   return (
     <p className="text-sm text-white/80 whitespace-pre-line leading-relaxed">
-      {above}
-      <span className="text-white/35">
-        {'…'}
-        <span className="inline-block text-blue-400 cursor-default font-medium ml-1 text-xs">see more</span>
-      </span>
-      <span className="hidden">{below}</span>
+      {expanded ? (
+        content
+      ) : (
+        <>
+          {above}
+          <span className="text-white/35">{'…'}</span>
+          <button
+            onClick={() => setExpanded(true)}
+            className="text-blue-400 font-medium ml-1 text-xs cursor-pointer hover:underline"
+          >
+            see more
+          </button>
+        </>
+      )}
     </p>
   );
 }
