@@ -5,9 +5,9 @@ import { GeneratePostRequest } from '@/types';
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const LENGTH_MAP = {
-  short:  { target: 300,  min: 250,  max: 380,  maxTokens: 512  },
-  medium: { target: 600,  min: 500,  max: 720,  maxTokens: 900  },
-  long:   { target: 1000, min: 850,  max: 1150, maxTokens: 1600 },
+  short:  { target: 300,  min: 250,  max: 380,  minWords: 45,  maxWords: 65,  maxTokens: 512  },
+  medium: { target: 600,  min: 500,  max: 720,  minWords: 90,  maxWords: 125, maxTokens: 900  },
+  long:   { target: 1000, min: 850,  max: 1150, minWords: 155, maxWords: 200, maxTokens: 1600 },
 };
 
 const TYPE_INSTRUCTIONS: Record<string, string> = {
@@ -37,23 +37,23 @@ function buildPrompt(topic: string, postType: string, tone: string, length: stri
   const cfg = LENGTH_MAP[length as keyof typeof LENGTH_MAP] ?? LENGTH_MAP.medium;
   return `You are an expert LinkedIn content creator. Generate a high-quality LinkedIn post.
 
+STRICT LENGTH RULE — read before writing:
+Write between ${cfg.minWords} and ${cfg.maxWords} words (≈ ${cfg.min}–${cfg.max} characters).
+This is non-negotiable. If your draft is under ${cfg.minWords} words, expand it before responding.
+
 Topic: ${topic}
 Post Type: ${postType} - ${TYPE_INSTRUCTIONS[postType] ?? ''}
 Tone: ${tone} - ${TONE_INSTRUCTIONS[tone] ?? ''}
 Angle for this variation: ${variationAngle}
 
-LENGTH REQUIREMENT (critical — this is characters, not words):
-- Write between ${cfg.min} and ${cfg.max} characters for the post body
-- Target is ${cfg.target} characters — do not write significantly less
-- Count your output carefully; pad with detail if needed to reach the minimum
+Content rules:
+- Write ONLY the post body (no preamble, no "Here is your post:", no meta-commentary)
+- Hook opening line that stops the scroll
+- Use strategic line breaks for LinkedIn readability
+- Every point must include a concrete detail, example, or stat — no filler sentences
+- Close with a clear call-to-action
 
-Requirements:
-- Write ONLY the post content (no meta-commentary, no preamble)
-- Use line breaks strategically for readability
-- Make the opening line a hook that stops the scroll
-- End with a clear call-to-action
-
-After the post, on a new line add exactly:
+After the post body, on a new line add exactly:
 HASHTAGS: #tag1 #tag2 #tag3 #tag4 #tag5
 CTA: [one sentence call to action]`;
 }
