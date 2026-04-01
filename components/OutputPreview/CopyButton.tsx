@@ -2,15 +2,14 @@
 
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface CopyButtonProps {
   text: string;
   label?: string;
-  className?: string;
+  style?: React.CSSProperties;
 }
 
-export function CopyButton({ text, label = 'Copy', className }: CopyButtonProps) {
+export function CopyButton({ text, label = 'Copy', style }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -22,25 +21,49 @@ export function CopyButton({ text, label = 'Copy', className }: CopyButtonProps)
   return (
     <button
       onClick={handleCopy}
-      className={cn(
-        'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-200',
-        copied
-          ? 'bg-green-500/15 text-green-400 border border-green-500/30'
-          : 'bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80 hover:border-white/20',
-        className
-      )}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '5px',
+        padding: '6px 12px',
+        minHeight: '32px',
+        borderRadius: '10px',
+        border: copied
+          ? '1px solid rgba(52,211,153,0.40)'
+          : '1px solid rgba(255,255,255,0.10)',
+        background: copied
+          ? 'rgba(52,211,153,0.10)'
+          : 'rgba(255,255,255,0.05)',
+        color: copied
+          ? 'rgba(52,211,153,1)'
+          : 'rgba(255,255,255,0.55)',
+        fontSize: '11.5px',
+        fontWeight: 600,
+        fontFamily: '"DM Sans", sans-serif',
+        cursor: 'pointer',
+        transition: 'all 0.18s ease',
+        whiteSpace: 'nowrap',
+        ...style,
+      }}
+      onMouseEnter={(e) => {
+        if (!copied) {
+          (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.22)';
+          (e.currentTarget as HTMLButtonElement).style.color       = 'rgba(255,255,255,0.85)';
+          (e.currentTarget as HTMLButtonElement).style.background  = 'rgba(255,255,255,0.09)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!copied) {
+          (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.10)';
+          (e.currentTarget as HTMLButtonElement).style.color       = 'rgba(255,255,255,0.55)';
+          (e.currentTarget as HTMLButtonElement).style.background  = 'rgba(255,255,255,0.05)';
+        }
+      }}
     >
-      {copied ? (
-        <>
-          <Check className="h-3 w-3" />
-          Copied!
-        </>
-      ) : (
-        <>
-          <Copy className="h-3 w-3" />
-          {label}
-        </>
-      )}
+      {copied
+        ? <><Check size={12} /> Copied!</>
+        : <><Copy size={12} /> {label}</>
+      }
     </button>
   );
 }

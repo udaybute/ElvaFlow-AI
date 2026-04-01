@@ -1,9 +1,8 @@
 'use client';
 
-import { GeneratedPost } from '@/types';
-import { cn } from '@/lib/utils';
-import { Sparkles, Star, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
+import { GeneratedPost } from '@/types';
+import { Sparkles, Star, Copy, Check } from 'lucide-react';
 
 interface VariationPickerProps {
   variations: GeneratedPost[];
@@ -11,29 +10,63 @@ interface VariationPickerProps {
   onSelect: (i: number) => void;
 }
 
-const LABELS = ['Version A', 'Version B', 'Version C'];
-const ANGLES = ['Personal angle', 'Data-driven', 'Bold & direct'];
-const COLORS = [
-  { ring: 'ring-blue-500/50 border-blue-500/50 bg-blue-500/10', label: 'text-blue-400', bar: 'bg-blue-500' },
-  { ring: 'ring-violet-500/50 border-violet-500/50 bg-violet-500/10', label: 'text-violet-400', bar: 'bg-violet-500' },
-  { ring: 'ring-pink-500/50 border-pink-500/50 bg-pink-500/10', label: 'text-pink-400', bar: 'bg-pink-500' },
+const LABELS  = ['Version A', 'Version B', 'Version C'];
+const ANGLES  = ['Personal angle', 'Data-driven', 'Bold & direct'];
+
+const PALETTE = [
+  {
+    activeBorder : 'rgba(96,165,250,0.50)',
+    activeBg     : 'rgba(59,130,246,0.10)',
+    activeGlow   : '0 0 18px rgba(59,130,246,0.14)',
+    labelActive  : 'rgba(147,197,253,1)',
+    bar          : 'rgba(96,165,250,1)',
+  },
+  {
+    activeBorder : 'rgba(167,139,250,0.50)',
+    activeBg     : 'rgba(139,92,246,0.10)',
+    activeGlow   : '0 0 18px rgba(139,92,246,0.14)',
+    labelActive  : 'rgba(216,180,254,1)',
+    bar          : 'rgba(167,139,250,1)',
+  },
+  {
+    activeBorder : 'rgba(244,114,182,0.50)',
+    activeBg     : 'rgba(236,72,153,0.10)',
+    activeGlow   : '0 0 18px rgba(236,72,153,0.14)',
+    labelActive  : 'rgba(249,168,212,1)',
+    bar          : 'rgba(244,114,182,1)',
+  },
 ];
 
 function VariationCopyBtn({ content, hashtags }: { content: string; hashtags: string[] }) {
   const [copied, setCopied] = useState(false);
+
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(`${content}\n\n${hashtags.join(' ')}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
   return (
     <button
       onClick={handleCopy}
-      className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-all h-5 w-5 rounded flex items-center justify-center bg-white/10 hover:bg-white/20 text-white/40 hover:text-white/80"
       title="Copy this variation"
+      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
+      style={{
+        width: '24px',
+        height: '24px',
+        borderRadius: '7px',
+        border: '1px solid rgba(255,255,255,0.12)',
+        background: 'rgba(255,255,255,0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        color: copied ? 'rgba(52,211,153,1)' : 'rgba(255,255,255,0.55)',
+        transition: 'all 0.15s ease',
+      }}
     >
-      {copied ? <Check className="h-2.5 w-2.5 text-green-400" /> : <Copy className="h-2.5 w-2.5" />}
+      {copied ? <Check size={11} /> : <Copy size={11} />}
     </button>
   );
 }
@@ -42,22 +75,36 @@ export function VariationPicker({ variations, selected, onSelect }: VariationPic
   if (variations.length === 0) return null;
 
   const bestIdx = variations.reduce(
-    (best, vv, ii) => ((vv.score?.overall ?? 0) > (variations[best].score?.overall ?? 0) ? ii : best),
+    (best, v, i) => ((v.score?.overall ?? 0) > (variations[best].score?.overall ?? 0) ? i : best),
     0
   );
 
   return (
-    <div className="space-y-2.5">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35 flex items-center gap-1.5">
-        <Sparkles className="h-3 w-3 text-primary/60" />
-        3 Variations — pick your favourite
-      </p>
-      <div className="grid grid-cols-3 gap-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Label */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <Sparkles size={11} style={{ color: 'rgba(139,92,246,0.70)' }} />
+        <span
+          style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.40)',
+            fontFamily: '"DM Sans", sans-serif',
+          }}
+        >
+          3 Variations — pick your favourite
+        </span>
+      </div>
+
+      {/* Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
         {variations.map((v, i) => {
-          const score = v.score?.overall ?? 0;
+          const score      = v.score?.overall ?? 0;
           const isSelected = i === selected;
-          const isBest = bestIdx === i;
-          const c = COLORS[i];
+          const isBest     = bestIdx === i;
+          const p          = PALETTE[i];
 
           return (
             <div
@@ -66,32 +113,124 @@ export function VariationPicker({ variations, selected, onSelect }: VariationPic
               tabIndex={0}
               onClick={() => onSelect(i)}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelect(i)}
-              className={cn(
-                'group relative rounded-xl border p-3 text-left transition-all duration-200 cursor-pointer',
-                isSelected
-                  ? `${c.ring} ring-1 shadow-[0_0_16px_oklch(0.65_0.22_265/15%)]`
-                  : 'border-white/8 bg-white/3 hover:border-white/18 hover:bg-white/5'
-              )}
+              className="group relative"
+              style={{
+                borderRadius: '14px',
+                border: isSelected
+                  ? `1px solid ${p.activeBorder}`
+                  : '1px solid rgba(255,255,255,0.07)',
+                background: isSelected
+                  ? p.activeBg
+                  : 'rgba(255,255,255,0.025)',
+                boxShadow: isSelected ? p.activeGlow : 'none',
+                padding: '12px 10px 10px',
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+                outline: 'none',
+                minHeight: '80px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+              }}
+              onMouseEnter={(e) => {
+                if (!isSelected) {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.14)';
+                  (e.currentTarget as HTMLDivElement).style.background  = 'rgba(255,255,255,0.05)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected) {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.07)';
+                  (e.currentTarget as HTMLDivElement).style.background  = 'rgba(255,255,255,0.025)';
+                }
+              }}
             >
-              <VariationCopyBtn content={v.content} hashtags={v.hashtags} />
+              {/* Best badge */}
               {isBest && (
-                <span className="absolute -top-2 left-2 flex items-center gap-0.5 text-[9px] bg-amber-500 text-white rounded-full px-1.5 py-0.5 font-bold uppercase tracking-wide">
-                  <Star className="h-2 w-2 fill-current" />
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    left: '10px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    color: '#fff',
+                    fontSize: '8.5px',
+                    fontWeight: 800,
+                    fontFamily: '"DM Sans", sans-serif',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    borderRadius: '20px',
+                    padding: '2px 7px',
+                    boxShadow: '0 2px 8px rgba(245,158,11,0.35)',
+                  }}
+                >
+                  <Star size={8} style={{ fill: '#fff', strokeWidth: 0 }} />
                   Best
                 </span>
               )}
-              <p className={cn('text-[11px] font-bold', isSelected ? c.label : 'text-white/70')}>
+
+              <VariationCopyBtn content={v.content} hashtags={v.hashtags} />
+
+              {/* Label */}
+              <p
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  fontFamily: '"DM Sans", sans-serif',
+                  color: isSelected ? p.labelActive : 'rgba(255,255,255,0.72)',
+                  margin: 0,
+                  lineHeight: 1,
+                }}
+              >
                 {LABELS[i]}
               </p>
-              <p className="text-[9px] text-white/30 mt-0.5 leading-tight">{ANGLES[i]}</p>
-              <div className="mt-2 flex items-center gap-1.5">
-                <div className="h-1 flex-1 bg-white/8 rounded-full overflow-hidden">
+
+              {/* Angle */}
+              <p
+                style={{
+                  fontSize: '9.5px',
+                  fontFamily: '"DM Sans", sans-serif',
+                  color: 'rgba(255,255,255,0.28)',
+                  margin: 0,
+                  lineHeight: 1.3,
+                }}
+              >
+                {ANGLES[i]}
+              </p>
+
+              {/* Score bar */}
+              <div
+                style={{
+                  marginTop: 'auto',
+                  paddingTop: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <div style={{ flex: 1, height: '3px', borderRadius: '99px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                   <div
-                    className={cn('h-full rounded-full transition-all duration-500', c.bar)}
-                    style={{ width: `${score}%` }}
+                    style={{
+                      height: '100%',
+                      borderRadius: '99px',
+                      width: `${score}%`,
+                      background: p.bar,
+                      transition: 'width 0.5s cubic-bezier(0.16,1,0.3,1)',
+                    }}
                   />
                 </div>
-                <span className={cn('text-[10px] font-bold tabular-nums', isSelected ? c.label : 'text-white/40')}>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    fontVariantNumeric: 'tabular-nums',
+                    fontFamily: '"DM Sans", sans-serif',
+                    color: isSelected ? p.labelActive : 'rgba(255,255,255,0.38)',
+                  }}
+                >
                   {score}
                 </span>
               </div>

@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Trash2, Download, Pencil, Check, X, Hash, ImageDown } from 'lucide-react';
+import { FileText, Trash2, Pencil, Check, X, ImageDown } from 'lucide-react';
 import { toast } from 'sonner';
-import { Textarea } from '@/components/ui/textarea';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { CopyButton } from './CopyButton';
 import { CharCounter } from './CharCounter';
 import { PostScoreCard } from './PostScore';
+import { PostPreview } from './PostPreview';
 import { VariationPicker } from './VariationPicker';
 import { GeneratedPost, UserProfile } from '@/types';
 
@@ -38,276 +37,145 @@ async function exportPostAsPng(post: GeneratedPost, profile: UserProfile) {
   toast.success('PNG card downloaded!');
 }
 
-function getInitials(name: string) {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
-}
-
-// Live streaming preview with blinking cursor
-function StreamingPreview({ contents, progress }: { contents: [string, string, string]; progress: [number, number, number] }) {
-  const activeIdx = progress.findIndex((p) => p > 0 && p < 100);
-  const liveText = activeIdx >= 0 ? contents[activeIdx] : (contents.find((c) => c.length > 0) ?? '');
-  // Strip trailing HASHTAGS/CTA lines from display
+function StreamingPreview({
+  contents,
+  progress,
+}: {
+  contents: [string, string, string];
+  progress: [number, number, number];
+}) {
+  const activeIdx  = progress.findIndex((p) => p > 0 && p < 100);
+  const liveText   = activeIdx >= 0 ? contents[activeIdx] : (contents.find((c) => c.length > 0) ?? '');
   const displayText = liveText.replace(/\nHASHTAGS:.*$/ms, '').replace(/\nCTA:.*$/ms, '').trim();
+  const LABELS = ['Variation A', 'Variation B', 'Variation C'];
 
   return (
-    <div className="space-y-4">
-      {/* Progress rows */}
-      <div className="space-y-2">
-        {(['Variation A', 'Variation B', 'Variation C'] as const).map((label, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <span className="text-[10px] font-semibold text-white/35 w-20 shrink-0">{label}</span>
-            <div className="flex-1 h-1 bg-white/6 rounded-full overflow-hidden">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {LABELS.map((label, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, fontFamily: '"DM Sans", sans-serif', color: 'rgba(255,255,255,0.35)', width: '76px', flexShrink: 0 }}>
+              {label}
+            </span>
+            <div style={{ flex: 1, height: '3px', borderRadius: '99px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
               <motion.div
-                className="h-full bg-primary rounded-full"
+                style={{ height: '100%', borderRadius: '99px', background: 'rgba(139,92,246,1)' }}
                 animate={{ width: `${progress[i]}%` }}
                 transition={{ duration: 0.3 }}
               />
             </div>
-            <span className="text-[10px] tabular-nums text-white/30 w-8 text-right">{progress[i]}%</span>
+            <span style={{ fontSize: '10px', fontVariantNumeric: 'tabular-nums', fontFamily: '"DM Sans", sans-serif', color: 'rgba(255,255,255,0.30)', width: '28px', textAlign: 'right', flexShrink: 0 }}>
+              {progress[i]}%
+            </span>
           </div>
         ))}
       </div>
-
-      {/* Live text */}
       {displayText && (
-        <div className="rounded-xl border border-white/8 bg-white/4 p-4 min-h-[120px]">
-          <p className="text-sm text-white/70 whitespace-pre-line leading-relaxed">
+        <div style={{ borderRadius: '14px', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)', padding: '14px 16px', minHeight: '120px' }}>
+          <p style={{ fontSize: '13px', lineHeight: '1.65', color: 'rgba(255,255,255,0.68)', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'pre-line', margin: 0 }}>
             {displayText}
-            <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse align-text-bottom" />
+            <span style={{ display: 'inline-block', width: '2px', height: '14px', background: 'rgba(139,92,246,1)', marginLeft: '2px', borderRadius: '1px', verticalAlign: 'text-bottom', animation: 'blink 1s step-end infinite' }} />
           </p>
         </div>
       )}
+      <style>{`@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}`}</style>
     </div>
   );
 }
 
-export function OutputPreview({
-  post,
-  variations,
-  selectedVariation,
-  editedContent,
-  isEditing,
-  isLoading,
-  streamingContents,
-  variationProgress,
-  profile,
-  savedHashtags,
-  onSelectVariation,
-  onEditedContentChange,
-  onStartEditing,
-  onSaveEdit,
-  onCancelEdit,
-  onDelete,
-  onToggleSavedHashtag,
-}: OutputPreviewProps) {
-  const displayContent = isEditing ? editedContent : (post?.content ?? '');
-
-  function handleCopy() {
-    const text = `${displayContent}\n\n${post?.hashtags.join(' ') ?? ''}`;
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
-  }
-
-  function handleSave() {
-    onSaveEdit();
-    toast.success('Post updated & saved!');
-  }
-
+function ActionBtn({ onClick, title, children, danger }: { onClick: () => void; title?: string; children: React.ReactNode; danger?: boolean }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+    <button
+      onClick={onClick}
+      title={title}
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 10px', minHeight: '32px', borderRadius: '10px', border: danger ? '1px solid rgba(248,113,113,0.20)' : '1px solid rgba(255,255,255,0.10)', background: danger ? 'rgba(248,113,113,0.06)' : 'rgba(255,255,255,0.05)', color: danger ? 'rgba(252,165,165,0.75)' : 'rgba(255,255,255,0.52)', fontSize: '11.5px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', cursor: 'pointer', transition: 'all 0.15s ease' }}
+      onMouseEnter={(e) => { const b = e.currentTarget as HTMLButtonElement; b.style.color = danger ? 'rgba(252,165,165,1)' : 'rgba(255,255,255,0.88)'; b.style.background = danger ? 'rgba(248,113,113,0.14)' : 'rgba(255,255,255,0.09)'; b.style.borderColor = danger ? 'rgba(248,113,113,0.40)' : 'rgba(255,255,255,0.22)'; }}
+      onMouseLeave={(e) => { const b = e.currentTarget as HTMLButtonElement; b.style.color = danger ? 'rgba(252,165,165,0.75)' : 'rgba(255,255,255,0.52)'; b.style.background = danger ? 'rgba(248,113,113,0.06)' : 'rgba(255,255,255,0.05)'; b.style.borderColor = danger ? 'rgba(248,113,113,0.20)' : 'rgba(255,255,255,0.10)'; }}
     >
-      <GlassCard className="p-6 space-y-5">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center">
-              <FileText className="h-4 w-4 text-blue-400" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-white/90">Generated Post</h3>
-              <p className="text-[11px] text-white/35">LinkedIn preview</p>
-            </div>
-          </div>
-
-          {post && !isEditing && (
-            <div className="flex items-center gap-1">
-              <CopyButton text={`${displayContent}\n\n${post.hashtags.join(' ')}`} />
-              <button
-                onClick={onStartEditing}
-                className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80 transition-all"
-              >
-                <Pencil className="h-3 w-3" />
-                Edit
-              </button>
-              <button
-                onClick={() => exportPostAsPng(post, profile)}
-                className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 hover:text-white/80 transition-all"
-                title="Export as PNG card"
-              >
-                <ImageDown className="h-3 w-3" />
-              </button>
-              {onDelete && (
-                <button
-                  onClick={onDelete}
-                  className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium bg-white/5 border border-white/10 text-red-400/60 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 transition-all"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-          )}
-
-          {isEditing && (
-            <div className="flex gap-1.5">
-              <button
-                onClick={handleSave}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold bg-green-500/20 border border-green-500/40 text-green-400 hover:bg-green-500/30 transition-all"
-              >
-                <Check className="h-3 w-3" /> Save
-              </button>
-              <button
-                onClick={onCancelEdit}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 transition-all"
-              >
-                <X className="h-3 w-3" /> Cancel
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="h-px bg-white/6" />
-
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <StreamingPreview contents={streamingContents} progress={variationProgress} />
-            </motion.div>
-          ) : post ? (
-            <motion.div
-              key={post.id}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-4"
-            >
-              <VariationPicker
-                variations={variations}
-                selected={selectedVariation}
-                onSelect={onSelectVariation}
-              />
-
-              {/* LinkedIn mock post */}
-              <div className="rounded-xl border border-white/8 bg-white/4 p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0 shadow-[0_0_12px_oklch(0.65_0.22_265/30%)]"
-                    style={{ background: `linear-gradient(135deg, ${profile.avatarColor}, ${profile.avatarColor}cc)` }}
-                  >
-                    {getInitials(profile.name)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white/90 leading-none">{profile.name}</p>
-                    <p className="text-[11px] text-white/35 mt-0.5">{profile.title} · Just now</p>
-                  </div>
-                </div>
-
-                {isEditing ? (
-                  <Textarea
-                    value={editedContent}
-                    onChange={(e) => onEditedContentChange(e.target.value)}
-                    className="min-h-[160px] text-sm text-white/85 bg-white/5 border-primary/40 leading-relaxed resize-none focus:border-primary/60 rounded-lg"
-                    autoFocus
-                  />
-                ) : (
-                  <LinkedInContent content={displayContent} />
-                )}
-
-                {post.hashtags.length > 0 && !isEditing && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {post.hashtags.map((tag) => {
-                      const saved = savedHashtags.includes(tag);
-                      return (
-                        <button
-                          key={tag}
-                          onClick={() => onToggleSavedHashtag(tag)}
-                          title={saved ? 'Remove from saved' : 'Save hashtag'}
-                          className={`inline-flex items-center gap-0.5 text-[11px] font-medium rounded-full px-2 py-0.5 border transition-all ${
-                            saved
-                              ? 'text-amber-400 bg-amber-500/15 border-amber-500/30'
-                              : 'text-blue-400/80 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20'
-                          }`}
-                        >
-                          <Hash className="h-2.5 w-2.5" />
-                          {tag.replace('#', '')}
-                          {saved && <span className="ml-0.5 text-[9px]">★</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {post.cta && !isEditing && (
-                  <p className="mt-3 text-xs text-white/30 italic border-t border-white/6 pt-3">
-                    {post.cta}
-                  </p>
-                )}
-              </div>
-
-              <CharCounter count={isEditing ? editedContent.length : post.characterCount} />
-              {post.score && <PostScoreCard score={post.score} />}
-            </motion.div>
-          ) : (
-            <motion.div
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-16 text-center"
-            >
-              <div className="h-16 w-16 rounded-2xl bg-blue-500/8 border border-blue-500/15 flex items-center justify-center mb-4">
-                <FileText className="h-7 w-7 text-blue-400/50" />
-              </div>
-              <p className="text-sm font-semibold text-white/40">Your post will appear here</p>
-              <p className="text-xs text-white/25 mt-1">Fill in the form and hit Generate</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </GlassCard>
-    </motion.div>
+      {children}
+    </button>
   );
 }
 
-// LinkedIn "see more" fold at ~210 chars
-function LinkedInContent({ content }: { content: string }) {
-  const FOLD = 210;
-  const [expanded, setExpanded] = useState(false);
+const Divider = () => <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)' }} />;
 
-  if (content.length <= FOLD) {
-    return <p className="text-sm text-white/80 whitespace-pre-line leading-relaxed">{content}</p>;
-  }
+export function OutputPreview({
+  post, variations, selectedVariation, editedContent, isEditing, isLoading,
+  streamingContents, variationProgress, profile, savedHashtags,
+  onSelectVariation, onEditedContentChange, onStartEditing, onSaveEdit,
+  onCancelEdit, onDelete, onToggleSavedHashtag,
+}: OutputPreviewProps) {
+  const displayContent = isEditing ? editedContent : (post?.content ?? '');
 
-  const above = content.slice(0, FOLD);
-  const below = content.slice(FOLD);
+  function handleSave() { onSaveEdit(); toast.success('Post updated & saved!'); }
 
   return (
-    <p className="text-sm text-white/80 whitespace-pre-line leading-relaxed">
-      {expanded ? (
-        content
-      ) : (
-        <>
-          {above}
-          <span className="text-white/35">{'…'}</span>
-          <button
-            onClick={() => setExpanded(true)}
-            className="text-blue-400 font-medium ml-1 text-xs cursor-pointer hover:underline"
-          >
-            see more
-          </button>
-        </>
-      )}
-    </p>
+    <>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;900&display=swap');`}</style>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}>
+        <GlassCard style={{ padding: '24px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', backdropFilter: 'blur(20px)', boxShadow: '0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)' }}>
+
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg, rgba(59,130,246,0.22), rgba(96,165,250,0.12))', border: '1px solid rgba(96,165,250,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 14px rgba(59,130,246,0.14)' }}>
+                <FileText size={17} style={{ color: 'rgba(147,197,253,1)' }} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255,255,255,0.92)', fontFamily: '"DM Sans", sans-serif', margin: 0, lineHeight: 1.3 }}>Generated Post</h3>
+                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.38)', fontFamily: '"DM Sans", sans-serif', margin: 0, marginTop: '1px' }}>LinkedIn preview</p>
+              </div>
+            </div>
+
+            {post && !isEditing && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CopyButton text={`${displayContent}\n\n${post.hashtags.join(' ')}`} />
+                <ActionBtn onClick={onStartEditing} title="Edit post"><Pencil size={13} /> Edit</ActionBtn>
+                <ActionBtn onClick={() => exportPostAsPng(post, profile)} title="Export as PNG"><ImageDown size={13} /></ActionBtn>
+                {onDelete && <ActionBtn onClick={onDelete} danger title="Delete post"><Trash2 size={13} /></ActionBtn>}
+              </div>
+            )}
+
+            {isEditing && (
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button onClick={handleSave} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', minHeight: '32px', borderRadius: '10px', border: '1px solid rgba(52,211,153,0.40)', background: 'rgba(52,211,153,0.12)', color: 'rgba(52,211,153,1)', fontSize: '11.5px', fontWeight: 700, fontFamily: '"DM Sans", sans-serif', cursor: 'pointer' }}>
+                  <Check size={13} /> Save
+                </button>
+                <ActionBtn onClick={onCancelEdit}><X size={13} /> Cancel</ActionBtn>
+              </div>
+            )}
+          </div>
+
+          <Divider />
+
+          {/* Body */}
+          <div style={{ marginTop: '20px' }}>
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <StreamingPreview contents={streamingContents} progress={variationProgress} />
+                </motion.div>
+              ) : post ? (
+                <motion.div key={post.id} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <VariationPicker variations={variations} selected={selectedVariation} onSelect={onSelectVariation} />
+                  <PostPreview post={post} profile={profile} isEditing={isEditing} editedContent={editedContent} savedHashtags={savedHashtags} onEditedContentChange={onEditedContentChange} onToggleSavedHashtag={onToggleSavedHashtag} />
+                  <CharCounter count={isEditing ? editedContent.length : post.characterCount} />
+                  {post.score && <PostScoreCard score={post.score} />}
+                </motion.div>
+              ) : (
+                <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '56px 20px', textAlign: 'center', gap: '12px' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(96,165,250,0.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FileText size={24} style={{ color: 'rgba(96,165,250,0.40)' }} />
+                  </div>
+                  <p style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.38)', fontFamily: '"DM Sans", sans-serif', margin: 0 }}>Your post will appear here</p>
+                  <p style={{ fontSize: '11.5px', color: 'rgba(255,255,255,0.22)', fontFamily: '"DM Sans", sans-serif', margin: 0 }}>Fill in the form and hit Generate</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+        </GlassCard>
+      </motion.div>
+    </>
   );
 }

@@ -2,8 +2,6 @@
 
 import { POST_TONES, POST_LENGTHS } from '@/lib/constants';
 import { PostTone, PostLength } from '@/types';
-import { cn } from '@/lib/utils';
-import { Mic2, AlignLeft } from 'lucide-react';
 
 interface ToneSelectorProps {
   tone: PostTone;
@@ -12,53 +10,135 @@ interface ToneSelectorProps {
   onLengthChange: (length: PostLength) => void;
 }
 
+const SECTION_LABEL_STYLE: React.CSSProperties = {
+  fontSize: '10px',
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: 'rgba(255,255,255,0.55)',
+  fontFamily: '"DM Sans", sans-serif',
+};
+
 export function ToneSelector({ tone, length, onToneChange, onLengthChange }: ToneSelectorProps) {
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-widest text-white/40 flex items-center gap-1.5">
-          <Mic2 className="h-3 w-3" />
-          Tone
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {POST_TONES.map((t) => (
-            <button
-              key={t.value}
-              onClick={() => onToneChange(t.value)}
-              className={cn(
-                'rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200',
-                tone === t.value
-                  ? 'border-primary/70 bg-primary/20 text-primary shadow-[0_0_12px_oklch(0.65_0.22_265/20%)]'
-                  : 'border-white/10 bg-white/3 text-white/50 hover:border-white/25 hover:text-white/80'
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+
+      {/* ── Tone pills ─────────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <label style={SECTION_LABEL_STYLE}>Tone</label>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+          {POST_TONES.map((t) => {
+            const isActive = tone === t.value;
+            return (
+              <button
+                key={t.value}
+                onClick={() => onToneChange(t.value)}
+                style={{
+                  borderRadius: '20px',
+                  border: isActive
+                    ? '1px solid rgba(167,139,250,0.55)'
+                    : '1px solid rgba(255,255,255,0.09)',
+                  background: isActive
+                    ? 'rgba(139,92,246,0.18)'
+                    : 'rgba(255,255,255,0.03)',
+                  boxShadow: isActive ? '0 0 12px rgba(139,92,246,0.18)' : 'none',
+                  padding: '6px 14px',
+                  minHeight: '32px',
+                  fontSize: '11.5px',
+                  fontWeight: isActive ? 700 : 500,
+                  fontFamily: '"DM Sans", sans-serif',
+                  color: isActive ? 'rgba(216,180,254,1)' : 'rgba(255,255,255,0.55)',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s cubic-bezier(0.16,1,0.3,1)',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.22)';
+                    (e.currentTarget as HTMLButtonElement).style.color       = 'rgba(255,255,255,0.80)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.09)';
+                    (e.currentTarget as HTMLButtonElement).style.color       = 'rgba(255,255,255,0.55)';
+                  }
+                }}
+              >
+                {t.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase tracking-widest text-white/40 flex items-center gap-1.5">
-          <AlignLeft className="h-3 w-3" />
-          Length
-        </label>
-        <div className="flex gap-2">
-          {POST_LENGTHS.map((l) => (
-            <button
-              key={l.value}
-              onClick={() => onLengthChange(l.value)}
-              className={cn(
-                'flex-1 rounded-xl border py-2.5 text-xs font-semibold transition-all duration-200',
-                length === l.value
-                  ? 'border-primary/70 bg-primary/15 text-primary shadow-[0_0_12px_oklch(0.65_0.22_265/15%)]'
-                  : 'border-white/8 bg-white/3 text-white/40 hover:border-white/20 hover:text-white/70'
-              )}
-            >
-              {l.label}
-              <span className="block text-[10px] mt-0.5 font-normal opacity-60">~{l.chars} chars</span>
-            </button>
-          ))}
+      {/* ── Length selector ────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <label style={SECTION_LABEL_STYLE}>Length</label>
+
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {POST_LENGTHS.map((l) => {
+            const isActive = length === l.value;
+            return (
+              <button
+                key={l.value}
+                onClick={() => onLengthChange(l.value)}
+                style={{
+                  flex: 1,
+                  borderRadius: '14px',
+                  border: isActive
+                    ? '1px solid rgba(167,139,250,0.50)'
+                    : '1px solid rgba(255,255,255,0.07)',
+                  background: isActive
+                    ? 'linear-gradient(145deg, rgba(139,92,246,0.16), rgba(236,72,153,0.08))'
+                    : 'rgba(255,255,255,0.025)',
+                  boxShadow: isActive ? '0 0 16px rgba(139,92,246,0.12)' : 'none',
+                  padding: '11px 8px',
+                  minHeight: '56px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '3px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.15)';
+                    (e.currentTarget as HTMLButtonElement).style.background  = 'rgba(255,255,255,0.05)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.07)';
+                    (e.currentTarget as HTMLButtonElement).style.background  = 'rgba(255,255,255,0.025)';
+                  }
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    fontFamily: '"DM Sans", sans-serif',
+                    color: isActive ? 'rgba(216,180,254,1)' : 'rgba(255,255,255,0.72)',
+                  }}
+                >
+                  {l.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: '9.5px',
+                    fontFamily: '"DM Sans", sans-serif',
+                    color: isActive ? 'rgba(216,180,254,0.50)' : 'rgba(255,255,255,0.28)',
+                  }}
+                >
+                  ~{l.chars} chars
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

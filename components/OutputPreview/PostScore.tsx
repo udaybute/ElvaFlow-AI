@@ -1,17 +1,16 @@
 'use client';
 
 import { PostScore as PostScoreType } from '@/types';
-import { cn } from '@/lib/utils';
 import { TrendingUp, Lightbulb } from 'lucide-react';
 
 interface PostScoreProps {
   score: PostScoreType;
 }
 
-function getColor(value: number) {
-  if (value >= 75) return { text: 'text-green-400', bg: 'bg-green-500' };
-  if (value >= 50) return { text: 'text-amber-400', bg: 'bg-amber-400' };
-  return { text: 'text-red-400', bg: 'bg-red-500' };
+function getColor(value: number): { text: string; fill: string; glow: string } {
+  if (value >= 75) return { text: 'rgba(52,211,153,1)',  fill: 'rgba(52,211,153,1)',  glow: 'rgba(52,211,153,0.25)'  };
+  if (value >= 50) return { text: 'rgba(251,191,36,1)',  fill: 'rgba(251,191,36,1)',  glow: 'rgba(251,191,36,0.20)'  };
+  return           { text: 'rgba(248,113,113,1)', fill: 'rgba(248,113,113,1)', glow: 'rgba(248,113,113,0.20)' };
 }
 
 function getLabel(value: number) {
@@ -20,89 +19,126 @@ function getLabel(value: number) {
   return 'Needs work';
 }
 
-// Rule-based tips for each dimension
 function getTips(score: PostScoreType): string[] {
   const tips: string[] = [];
-
-  if (score.hook < 75) {
-    if (score.hook < 50) {
-      tips.push('Start with a bold number or stat — "I made $0 in my first 6 months. Here\'s what changed."');
-    } else {
-      tips.push('Open with a question or a surprising fact to stop the scroll faster.');
-    }
-  }
-
-  if (score.readability < 75) {
-    if (score.readability < 50) {
-      tips.push('Break long paragraphs into 1–2 sentence chunks. White space dramatically improves engagement.');
-    } else {
-      tips.push('Add a blank line after your hook — it creates visual breathing room and increases read-through rate.');
-    }
-  }
-
-  if (score.cta < 75) {
-    if (score.cta < 50) {
-      tips.push('Add a direct CTA at the end: "Drop a 🔥 if this resonated" or "What\'s your take? Comment below."');
-    } else {
-      tips.push('Make your CTA more specific — ask a single, focused question rather than a generic "thoughts?"');
-    }
-  }
-
-  if (score.hashtags < 75) {
-    if (score.hashtags < 40) {
-      tips.push('Add 3–5 relevant hashtags at the end. More than 10 hurts reach on LinkedIn.');
-    } else {
-      tips.push('Mix broad hashtags (#Leadership) with niche ones (#ProductLedGrowth) for wider but targeted reach.');
-    }
-  }
-
-  if (score.overall >= 80) {
-    tips.push('This post is well-optimised. Publish it in the morning (8–10am) for maximum LinkedIn reach.');
-  }
-
+  if (score.hook < 75)
+    tips.push(score.hook < 50
+      ? 'Open with a bold stat or confession — e.g. "I made $0 in my first 6 months. Here\'s what changed."'
+      : 'Add a blank line after your hook. Visual breathing room increases read-through rate.');
+  if (score.readability < 75)
+    tips.push(score.readability < 50
+      ? 'Break paragraphs into 1–2 sentence chunks. White space dramatically improves engagement.'
+      : 'Vary sentence length — short punchy lines followed by a longer one hold attention better.');
+  if (score.cta < 75)
+    tips.push(score.cta < 50
+      ? 'Add a direct CTA: "Drop a 🔥 if this resonated" or "What\'s your take? Comment below."'
+      : 'Make your CTA more specific — ask a single focused question, not a generic "thoughts?"');
+  if (score.hashtags < 75)
+    tips.push(score.hashtags < 40
+      ? 'Add 3–5 relevant hashtags. More than 10 hurts reach on LinkedIn.'
+      : 'Mix broad (#Leadership) with niche (#ProductLedGrowth) hashtags for targeted reach.');
+  if (score.overall >= 80)
+    tips.push('Solid post. Publish between 8–10 am on a weekday for maximum LinkedIn reach.');
   return tips.slice(0, 3);
 }
 
 function ScoreRing({ value }: { value: number }) {
-  const c = getColor(value);
-  const label = getLabel(value);
-  const radius = 30;
+  const c            = getColor(value);
+  const radius       = 28;
   const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference - (value / 100) * circumference;
+  const dashOffset   = circumference - (value / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center gap-1 shrink-0">
-      <div className="relative w-20 h-20 flex items-center justify-center">
-        <svg className="absolute inset-0 -rotate-90" viewBox="0 0 72 72">
-          <circle cx="36" cy="36" r={radius} fill="none" stroke="oklch(1 0 0 / 6%)" strokeWidth="5" />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '5px',
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          position: 'relative',
+          width: '72px',
+          height: '72px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <svg
+          style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}
+          viewBox="0 0 64 64"
+        >
+          <circle cx="32" cy="32" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4.5" />
           <circle
-            cx="36" cy="36" r={radius}
+            cx="32" cy="32" r={radius}
             fill="none"
-            stroke={value >= 75 ? 'oklch(0.65 0.22 145)' : value >= 50 ? 'oklch(0.75 0.17 80)' : 'oklch(0.65 0.22 27)'}
-            strokeWidth="5"
+            stroke={c.fill}
+            strokeWidth="4.5"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={dashOffset}
-            style={{ transition: 'stroke-dashoffset 1s cubic-bezier(0.34,1.56,0.64,1)' }}
+            style={{
+              transition: 'stroke-dashoffset 1s cubic-bezier(0.34,1.56,0.64,1)',
+              filter: `drop-shadow(0 0 4px ${c.glow})`,
+            }}
           />
         </svg>
-        <div className={cn('text-2xl font-black tabular-nums leading-none', c.text)}>{value}</div>
+        <span
+          style={{
+            fontSize: '20px',
+            fontWeight: 900,
+            fontVariantNumeric: 'tabular-nums',
+            fontFamily: '"DM Sans", sans-serif',
+            color: c.text,
+            lineHeight: 1,
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
+          {value}
+        </span>
       </div>
-      <span className={cn('text-[11px] font-semibold', c.text)}>{label}</span>
+      <span
+        style={{
+          fontSize: '10px',
+          fontWeight: 700,
+          fontFamily: '"DM Sans", sans-serif',
+          color: c.text,
+          letterSpacing: '0.04em',
+        }}
+      >
+        {getLabel(value)}
+      </span>
     </div>
   );
 }
 
-function ScoreBar({ label, value, tip }: { label: string; value: number; tip: string }) {
+function ScoreBar({ label, value }: { label: string; value: number }) {
   const c = getColor(value);
   return (
-    <div className="space-y-1" title={tip}>
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="text-white/45 font-medium">{label}</span>
-        <span className={cn('font-bold tabular-nums', c.text)}>{value}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: '11px', fontWeight: 500, fontFamily: '"DM Sans", sans-serif', color: 'rgba(255,255,255,0.50)' }}>
+          {label}
+        </span>
+        <span style={{ fontSize: '11px', fontWeight: 700, fontVariantNumeric: 'tabular-nums', fontFamily: '"DM Sans", sans-serif', color: c.text }}>
+          {value}
+        </span>
       </div>
-      <div className="h-1 bg-white/6 rounded-full overflow-hidden">
-        <div className={cn('h-full rounded-full transition-all duration-700', c.bg)} style={{ width: `${value}%` }} />
+      <div style={{ height: '3px', borderRadius: '99px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+        <div
+          style={{
+            height: '100%',
+            borderRadius: '99px',
+            width: `${value}%`,
+            background: c.fill,
+            transition: 'width 0.7s cubic-bezier(0.16,1,0.3,1)',
+          }}
+        />
       </div>
     </div>
   );
@@ -112,33 +148,85 @@ export function PostScoreCard({ score }: PostScoreProps) {
   const tips = getTips(score);
 
   return (
-    <div className="rounded-xl border border-white/8 bg-white/3 p-4 space-y-4">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-white/35 flex items-center gap-1.5">
-        <TrendingUp className="h-3 w-3 text-primary/60" />
-        Engagement Score
-      </p>
+    <div
+      style={{
+        borderRadius: '16px',
+        border: '1px solid rgba(255,255,255,0.07)',
+        background: 'rgba(255,255,255,0.025)',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '14px',
+      }}
+    >
+      {/* Section label */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <TrendingUp size={12} style={{ color: 'rgba(139,92,246,0.70)' }} />
+        <span
+          style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.40)',
+            fontFamily: '"DM Sans", sans-serif',
+          }}
+        >
+          Engagement Score
+        </span>
+      </div>
 
-      <div className="flex items-center gap-5">
+      {/* Ring + bars */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
         <ScoreRing value={score.overall} />
-        <div className="flex-1 space-y-2.5">
-          <ScoreBar label="Hook strength" value={score.hook} tip="How well the opening line grabs attention" />
-          <ScoreBar label="Readability" value={score.readability} tip="Sentence length, line breaks, structure" />
-          <ScoreBar label="Call-to-action" value={score.cta} tip="How clearly the post drives engagement" />
-          <ScoreBar label="Hashtags" value={score.hashtags} tip="Relevance and count of hashtags" />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <ScoreBar label="Hook strength"   value={score.hook}        />
+          <ScoreBar label="Readability"     value={score.readability} />
+          <ScoreBar label="Call-to-action"  value={score.cta}         />
+          <ScoreBar label="Hashtags"        value={score.hashtags}    />
         </div>
       </div>
 
       {/* Tips */}
       {tips.length > 0 && (
-        <div className="space-y-2 pt-1 border-t border-white/6">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-white/30 flex items-center gap-1.5">
-            <Lightbulb className="h-3 w-3 text-amber-400/60" />
-            Improvement tips
-          </p>
+        <div
+          style={{
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            paddingTop: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Lightbulb size={11} style={{ color: 'rgba(251,191,36,0.65)' }} />
+            <span
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.10em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.30)',
+                fontFamily: '"DM Sans", sans-serif',
+              }}
+            >
+              Improvement Tips
+            </span>
+          </div>
           {tips.map((tip, i) => (
-            <div key={i} className="flex gap-2">
-              <span className="text-amber-400/60 text-xs mt-0.5 shrink-0">→</span>
-              <p className="text-[11px] text-white/45 leading-relaxed">{tip}</p>
+            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+              <span style={{ color: 'rgba(251,191,36,0.55)', fontSize: '11px', lineHeight: '1.5', flexShrink: 0 }}>→</span>
+              <p
+                style={{
+                  fontSize: '11px',
+                  lineHeight: '1.55',
+                  color: 'rgba(255,255,255,0.48)',
+                  fontFamily: '"DM Sans", sans-serif',
+                  margin: 0,
+                }}
+              >
+                {tip}
+              </p>
             </div>
           ))}
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Hash, Star, X } from 'lucide-react';
+import { Star, X, Hash } from 'lucide-react';
 
 interface HashtagManagerProps {
   savedHashtags: string[];
@@ -12,27 +12,109 @@ export function HashtagManager({ savedHashtags, onInsert, onRemove }: HashtagMan
   if (savedHashtags.length === 0) return null;
 
   return (
-    <div className="space-y-2">
-      <label className="text-xs font-semibold uppercase tracking-widest text-white/40 flex items-center gap-1.5">
-        <Star className="h-3 w-3 text-amber-400/60" />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <label
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontSize: '10px',
+          fontWeight: 700,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.55)',
+          fontFamily: '"DM Sans", sans-serif',
+        }}
+      >
+        <Star size={11} style={{ color: 'rgba(251,191,36,0.75)' }} />
         Saved Hashtags
-        <span className="text-white/20 font-normal normal-case tracking-normal">— click to insert</span>
+        <span
+          style={{
+            fontSize: '10px',
+            fontWeight: 400,
+            textTransform: 'none',
+            letterSpacing: '0',
+            color: 'rgba(255,255,255,0.25)',
+          }}
+        >
+          — click to insert
+        </span>
       </label>
-      <div className="flex flex-wrap gap-1.5">
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
         {savedHashtags.map((tag) => (
-          <div key={tag} className="group flex items-center gap-0.5 rounded-full border border-amber-500/25 bg-amber-500/10 pl-2 pr-1 py-0.5">
+          <div
+            key={tag}
+            className="group"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '2px',
+              borderRadius: '20px',
+              border: '1px solid rgba(251,191,36,0.22)',
+              background: 'rgba(251,191,36,0.07)',
+              paddingLeft: '10px',
+              paddingRight: '4px',
+              paddingTop: '4px',
+              paddingBottom: '4px',
+              transition: 'border-color 0.15s, background 0.15s',
+            }}
+          >
+            {/* Insert button — entire tag text is the target */}
             <button
               onClick={() => onInsert(tag)}
-              className="text-[11px] font-medium text-amber-400/80 hover:text-amber-300 flex items-center gap-0.5 transition-colors"
+              title={`Insert ${tag}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px',
+                fontSize: '11.5px',
+                fontWeight: 600,
+                fontFamily: '"DM Sans", sans-serif',
+                color: 'rgba(253,224,71,0.80)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+                minHeight: '24px', // touch target: supplemented by parent padding
+                transition: 'color 0.15s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(253,224,71,1)')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(253,224,71,0.80)')}
             >
-              <Hash className="h-2.5 w-2.5" />
-              {tag.replace('#', '')}
+              <Hash size={10} />
+              {tag.replace(/^#/, '')}
             </button>
+
+            {/* Remove button */}
             <button
               onClick={() => onRemove(tag)}
-              className="ml-1 text-amber-400/30 hover:text-amber-400/80 transition-colors opacity-0 group-hover:opacity-100"
+              title={`Remove ${tag}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                border: 'none',
+                background: 'transparent',
+                color: 'rgba(251,191,36,0.30)',
+                cursor: 'pointer',
+                marginLeft: '2px',
+                transition: 'color 0.15s, background 0.15s',
+                flexShrink: 0,
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(248,113,113,0.90)';
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(248,113,113,0.12)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = 'rgba(251,191,36,0.30)';
+                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+              }}
             >
-              <X className="h-2.5 w-2.5" />
+              <X size={10} />
             </button>
           </div>
         ))}

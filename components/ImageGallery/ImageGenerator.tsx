@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ImageIcon, Loader2, Wand2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Sparkles, Loader2, Clock } from 'lucide-react';
 import { IMAGE_STYLES } from '@/lib/constants';
 import { ImageStyle } from '@/types';
 import { cn } from '@/lib/utils';
@@ -14,73 +13,195 @@ interface ImageGeneratorProps {
   onGenerate: (style: ImageStyle) => void;
 }
 
-const STYLE_ICONS: Record<string, string> = {
-  professional: '🏢',
-  minimal: '◽',
-  colorful: '🎨',
-  abstract: '✦',
+const STYLE_META: Record<string, { icon: string; description: string }> = {
+  professional: { icon: '🏢', description: 'Clean & corporate' },
+  minimal:      { icon: '◻︎', description: 'Less is more'     },
+  colorful:     { icon: '🎨', description: 'Bold & vivid'     },
+  abstract:     { icon: '✦',  description: 'Artistic & fluid' },
 };
 
-export function ImageGenerator({ prompt, isLoading, remainingImages, onGenerate }: ImageGeneratorProps) {
+export function ImageGenerator({
+  prompt,
+  isLoading,
+  remainingImages,
+  onGenerate,
+}: ImageGeneratorProps) {
   const [selectedStyle, setSelectedStyle] = useState<ImageStyle>('professional');
 
+  const isRateLimited  = remainingImages === 0;
+  const isDisabled     = isLoading || !prompt.trim() || isRateLimited;
+
+  const statusColor =
+    remainingImages > 2 ? '#34d399' :
+    remainingImages > 0 ? '#fbbf24' :
+    '#f87171';
+
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-[11px] font-semibold uppercase tracking-widest text-white/35 flex items-center gap-1.5">
-          <Wand2 className="h-3 w-3" />
+    <div className="space-y-5">
+
+      {/* ── Style selector ─────────────────────────────────── */}
+      <div className="space-y-3">
+        <p
+          style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.55)',
+            fontFamily: '"DM Sans", sans-serif',
+          }}
+        >
           Banner Style
-        </label>
+        </p>
+
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {IMAGE_STYLES.map((style) => (
-            <button
-              key={style.value}
-              onClick={() => setSelectedStyle(style.value)}
-              className={cn(
-                'rounded-xl border py-2.5 px-3 text-xs font-semibold transition-all duration-200 text-center',
-                selectedStyle === style.value
-                  ? 'border-primary/60 bg-primary/15 text-primary ring-1 ring-primary/30 shadow-[0_0_14px_oklch(0.65_0.22_265/12%)]'
-                  : 'border-white/8 bg-white/3 text-white/40 hover:border-white/20 hover:text-white/70'
-              )}
-            >
-              <span className="block text-base mb-0.5">{STYLE_ICONS[style.value]}</span>
-              {style.label}
-            </button>
-          ))}
+          {IMAGE_STYLES.map((style) => {
+            const meta      = STYLE_META[style.value];
+            const isActive  = selectedStyle === style.value;
+
+            return (
+              <button
+                key={style.value}
+                onClick={() => setSelectedStyle(style.value)}
+                style={{
+                  minHeight: '64px',
+                  borderRadius: '14px',
+                  border: isActive
+                    ? '1px solid rgba(167,139,250,0.55)'
+                    : '1px solid rgba(255,255,255,0.08)',
+                  background: isActive
+                    ? 'linear-gradient(145deg, rgba(139,92,246,0.18), rgba(236,72,153,0.10))'
+                    : 'rgba(255,255,255,0.03)',
+                  boxShadow: isActive
+                    ? '0 0 20px rgba(139,92,246,0.15), inset 0 1px 0 rgba(255,255,255,0.06)'
+                    : 'none',
+                  padding: '10px 12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
+                }}
+                className={cn('group')}
+              >
+                <span style={{ fontSize: '18px', lineHeight: 1 }}>{meta.icon}</span>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: isActive ? 'rgba(216,180,254,1)' : 'rgba(255,255,255,0.60)',
+                    fontFamily: '"DM Sans", sans-serif',
+                    letterSpacing: '0.01em',
+                  }}
+                >
+                  {style.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: '9.5px',
+                    color: isActive ? 'rgba(216,180,254,0.65)' : 'rgba(255,255,255,0.28)',
+                    fontFamily: '"DM Sans", sans-serif',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {meta.description}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      <Button
-        onClick={() => onGenerate(selectedStyle)}
-        disabled={isLoading || !prompt.trim() || remainingImages === 0}
-        className="w-full h-10 font-semibold rounded-xl text-sm"
+      {/* ── Generate button ────────────────────────────────── */}
+      <button
+        onClick={() => !isDisabled && onGenerate(selectedStyle)}
+        disabled={isDisabled}
         style={{
-          background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
-          color: 'white',
+          width: '100%',
+          height: '48px',
+          borderRadius: '14px',
           border: 'none',
+          cursor: isDisabled ? 'not-allowed' : 'pointer',
+          fontFamily: '"DM Sans", sans-serif',
+          fontSize: '13px',
+          fontWeight: 700,
+          letterSpacing: '0.02em',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+          position: 'relative',
+          overflow: 'hidden',
+          ...(isRateLimited
+            ? {
+                background: 'rgba(255,255,255,0.04)',
+                color: 'rgba(255,255,255,0.30)',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }
+            : isDisabled
+            ? {
+                background: 'rgba(139,92,246,0.15)',
+                color: 'rgba(255,255,255,0.30)',
+              }
+            : {
+                background: 'linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%)',
+                color: '#fff',
+                boxShadow: '0 4px 24px rgba(139,92,246,0.35), 0 1px 0 rgba(255,255,255,0.12) inset',
+              }),
         }}
       >
         {isLoading ? (
-          <span className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Generating banner...
-          </span>
+          <>
+            <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} />
+            Generating banner…
+          </>
+        ) : isRateLimited ? (
+          <>
+            <Clock size={15} />
+            Rate limit reached · resets in 1 hr
+          </>
         ) : (
-          <span className="flex items-center gap-2">
-            <ImageIcon className="h-4 w-4" />
+          <>
+            <Sparkles size={15} />
             Generate Banner
-          </span>
+          </>
         )}
-      </Button>
+      </button>
 
-      <div className="flex items-center justify-center gap-1.5">
-        <div className={`h-1.5 w-1.5 rounded-full ${remainingImages > 2 ? 'bg-green-500' : remainingImages > 0 ? 'bg-amber-400' : 'bg-red-500'}`} />
-        <p className="text-center text-[11px] text-white/30">
-          {remainingImages > 0
-            ? `${remainingImages} banner${remainingImages !== 1 ? 's' : ''} remaining this hour`
-            : 'Rate limit reached — resets in 1 hour'}
-        </p>
-      </div>
+      {/* ── Remaining counter ──────────────────────────────── */}
+      {!isRateLimited && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+          }}
+        >
+          <span
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              background: statusColor,
+              boxShadow: `0 0 6px ${statusColor}`,
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              fontSize: '11px',
+              color: 'rgba(255,255,255,0.45)',
+              fontFamily: '"DM Sans", sans-serif',
+            }}
+          >
+            {remainingImages} banner{remainingImages !== 1 ? 's' : ''} remaining this hour
+          </span>
+        </div>
+      )}
     </div>
   );
 }
