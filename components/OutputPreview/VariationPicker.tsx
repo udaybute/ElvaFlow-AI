@@ -60,11 +60,14 @@ export function VariationPicker({ variations, selected, onSelect }: VariationPic
           const c = COLORS[i];
 
           return (
-            <button
+            <div
               key={v.id}
+              role="button"
+              tabIndex={0}
               onClick={() => onSelect(i)}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelect(i)}
               className={cn(
-                'group relative rounded-xl border p-3 text-left transition-all duration-200',
+                'group relative rounded-xl border p-3 text-left transition-all duration-200 cursor-pointer',
                 isSelected
                   ? `${c.ring} ring-1 shadow-[0_0_16px_oklch(0.65_0.22_265/15%)]`
                   : 'border-white/8 bg-white/3 hover:border-white/18 hover:bg-white/5'
@@ -92,7 +95,7 @@ export function VariationPicker({ variations, selected, onSelect }: VariationPic
                   {score}
                 </span>
               </div>
-            </button>
+            </div>
           );
         })}
       </div>
