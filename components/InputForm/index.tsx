@@ -72,42 +72,44 @@ export function InputForm({
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
         <GlassCard
+          className="top-accent-line"
           style={{
             padding: '24px',
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.07)',
+            background: 'linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018))',
+            border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: '20px',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)',
+            backdropFilter: 'blur(28px) saturate(200%)',
+            boxShadow: '0 8px 48px rgba(0,0,0,0.32), 0 2px 8px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.08)',
           }}
         >
           {/* ── Header ──────────────────────────────────── */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
             <div
               style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, rgba(139,92,246,0.25), rgba(236,72,153,0.15))',
-                border: '1px solid rgba(139,92,246,0.30)',
+                width: '42px',
+                height: '42px',
+                borderRadius: '13px',
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.30), rgba(236,72,153,0.18))',
+                border: '1px solid rgba(139,92,246,0.35)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
-                boxShadow: '0 0 16px rgba(139,92,246,0.15)',
+                boxShadow: '0 0 24px rgba(139,92,246,0.22), inset 0 1px 0 rgba(255,255,255,0.10)',
               }}
             >
-              <Wand2 size={17} style={{ color: 'rgba(196,167,255,1)' }} />
+              <Wand2 size={18} style={{ color: 'rgba(216,180,254,1)' }} />
             </div>
             <div>
               <h3
                 style={{
                   fontSize: '14px',
-                  fontWeight: 700,
-                  color: 'rgba(255,255,255,0.92)',
+                  fontWeight: 800,
+                  color: 'rgba(255,255,255,0.94)',
                   fontFamily: '"DM Sans", sans-serif',
                   margin: 0,
                   lineHeight: 1.3,
+                  letterSpacing: '-0.01em',
                 }}
               >
                 Create Your Post
@@ -115,10 +117,10 @@ export function InputForm({
               <p
                 style={{
                   fontSize: '11px',
-                  color: 'rgba(255,255,255,0.38)',
+                  color: 'rgba(255,255,255,0.40)',
                   fontFamily: '"DM Sans", sans-serif',
                   margin: 0,
-                  marginTop: '1px',
+                  marginTop: '2px',
                 }}
               >
                 AI generates 3 unique variations
@@ -156,16 +158,17 @@ export function InputForm({
               <button
                 onClick={() => canGenerate && onGenerate()}
                 disabled={!canGenerate}
+                className={canGenerate ? 'shimmer-hover' : ''}
                 style={{
                   width: '100%',
-                  height: '48px',
+                  height: '50px',
                   borderRadius: '14px',
                   border: 'none',
                   cursor: canGenerate ? 'pointer' : 'not-allowed',
                   fontFamily: '"DM Sans", sans-serif',
                   fontSize: '13px',
                   fontWeight: 700,
-                  letterSpacing: '0.02em',
+                  letterSpacing: '0.03em',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -174,18 +177,18 @@ export function InputForm({
                   ...(isRateLimited
                     ? {
                         background: 'rgba(255,255,255,0.04)',
-                        color: 'rgba(255,255,255,0.30)',
+                        color: 'rgba(255,255,255,0.28)',
                         border: '1px solid rgba(255,255,255,0.08)',
                       }
                     : !canGenerate
                     ? {
-                        background: 'rgba(139,92,246,0.15)',
-                        color: 'rgba(255,255,255,0.28)',
+                        background: 'rgba(139,92,246,0.12)',
+                        color: 'rgba(255,255,255,0.24)',
                       }
                     : {
-                        background: 'linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%)',
+                        background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 45%, #DB2777 100%)',
                         color: '#fff',
-                        boxShadow: '0 4px 24px rgba(139,92,246,0.35), inset 0 1px 0 rgba(255,255,255,0.12)',
+                        boxShadow: '0 4px 28px rgba(139,92,246,0.45), 0 2px 8px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.16)',
                       }),
                 }}
               >

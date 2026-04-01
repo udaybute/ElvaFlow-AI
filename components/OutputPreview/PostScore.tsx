@@ -192,21 +192,25 @@ export function PostScoreCard({ score }: PostScoreProps) {
         <div
           style={{
             borderTop: '1px solid rgba(255,255,255,0.06)',
-            paddingTop: '12px',
+            paddingTop: '14px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px',
+            gap: '10px',
+            background: 'rgba(251,191,36,0.025)',
+            borderRadius: '0 0 14px 14px',
+            margin: '0 -16px -16px',
+            padding: '14px 16px 16px',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Lightbulb size={11} style={{ color: 'rgba(251,191,36,0.65)' }} />
+            <Lightbulb size={12} style={{ color: 'rgba(251,191,36,0.75)' }} />
             <span
               style={{
                 fontSize: '10px',
                 fontWeight: 700,
                 letterSpacing: '0.10em',
                 textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.30)',
+                color: 'rgba(255,255,255,0.35)',
                 fontFamily: '"DM Sans", sans-serif',
               }}
             >
@@ -214,13 +218,13 @@ export function PostScoreCard({ score }: PostScoreProps) {
             </span>
           </div>
           {tips.map((tip, i) => (
-            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-              <span style={{ color: 'rgba(251,191,36,0.55)', fontSize: '11px', lineHeight: '1.5', flexShrink: 0 }}>→</span>
+            <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', padding: '8px 10px', borderRadius: '10px', background: 'rgba(251,191,36,0.04)', border: '1px solid rgba(251,191,36,0.08)' }}>
+              <span style={{ color: 'rgba(251,191,36,0.70)', fontSize: '10px', lineHeight: '1.65', flexShrink: 0, marginTop: '1px' }}>→</span>
               <p
                 style={{
                   fontSize: '11px',
-                  lineHeight: '1.55',
-                  color: 'rgba(255,255,255,0.48)',
+                  lineHeight: '1.6',
+                  color: 'rgba(255,255,255,0.52)',
                   fontFamily: '"DM Sans", sans-serif',
                   margin: 0,
                 }}

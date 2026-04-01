@@ -37,8 +37,8 @@ export function TopicInput({ value, onChange }: TopicInputProps) {
           transition: 'border-color 0.2s, box-shadow 0.2s',
         }}
         onFocusCapture={(e) => {
-          (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.50)';
-          (e.currentTarget as HTMLDivElement).style.boxShadow  = '0 0 0 3px rgba(139,92,246,0.10)';
+          (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.65)';
+          (e.currentTarget as HTMLDivElement).style.boxShadow  = '0 0 0 3px rgba(139,92,246,0.14), 0 0 24px rgba(139,92,246,0.08)';
         }}
         onBlurCapture={(e) => {
           (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.09)';

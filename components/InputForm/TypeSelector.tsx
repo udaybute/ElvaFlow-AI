@@ -3,6 +3,15 @@
 import { POST_TYPES } from '@/lib/constants';
 import { PostType } from '@/types';
 
+const TYPE_ICONS: Record<string, string> = {
+  'thought-leadership': '💡',
+  'personal-story':     '📖',
+  'how-to':             '🔧',
+  'company-update':     '📢',
+  'question':           '💬',
+  'announcement':       '🎉',
+};
+
 interface TypeSelectorProps {
   value: PostType;
   onChange: (value: PostType) => void;
@@ -42,23 +51,23 @@ export function TypeSelector({ value, onChange }: TypeSelectorProps) {
               style={{
                 borderRadius: '14px',
                 border: isActive
-                  ? '1px solid rgba(167,139,250,0.50)'
+                  ? '1px solid rgba(167,139,250,0.55)'
                   : '1px solid rgba(255,255,255,0.07)',
                 background: isActive
-                  ? 'linear-gradient(145deg, rgba(139,92,246,0.16), rgba(236,72,153,0.08))'
+                  ? 'linear-gradient(145deg, rgba(139,92,246,0.20), rgba(236,72,153,0.10))'
                   : 'rgba(255,255,255,0.025)',
                 boxShadow: isActive
-                  ? '0 0 18px rgba(139,92,246,0.12), inset 0 1px 0 rgba(255,255,255,0.05)'
+                  ? '0 0 22px rgba(139,92,246,0.18), inset 0 1px 0 rgba(255,255,255,0.07)'
                   : 'none',
                 padding: '12px 13px',
                 textAlign: 'left',
                 cursor: 'pointer',
                 transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-                minHeight: '60px',
+                minHeight: '64px',
               }}
               onMouseEnter={(e) => {
                 if (!isActive) {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.15)';
+                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.16)';
                   (e.currentTarget as HTMLButtonElement).style.background  = 'rgba(255,255,255,0.05)';
                 }
               }}
@@ -69,25 +78,30 @@ export function TypeSelector({ value, onChange }: TypeSelectorProps) {
                 }
               }}
             >
-              <p
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  color: isActive ? 'rgba(216,180,254,1)' : 'rgba(255,255,255,0.78)',
-                  fontFamily: '"DM Sans", sans-serif',
-                  margin: 0,
-                  lineHeight: 1,
-                }}
-              >
-                {type.label}
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '4px' }}>
+                <span style={{ fontSize: '14px', lineHeight: 1, flexShrink: 0 }}>
+                  {TYPE_ICONS[type.value]}
+                </span>
+                <p
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: isActive ? 'rgba(216,180,254,1)' : 'rgba(255,255,255,0.82)',
+                    fontFamily: '"DM Sans", sans-serif',
+                    margin: 0,
+                    lineHeight: 1,
+                  }}
+                >
+                  {type.label}
+                </p>
+              </div>
               <p
                 style={{
                   fontSize: '10px',
                   color: isActive ? 'rgba(216,180,254,0.55)' : 'rgba(255,255,255,0.32)',
                   fontFamily: '"DM Sans", sans-serif',
                   margin: 0,
-                  marginTop: '5px',
+                  marginLeft: '21px',
                   lineHeight: 1.4,
                 }}
               >

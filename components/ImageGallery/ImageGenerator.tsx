@@ -118,16 +118,17 @@ export function ImageGenerator({
       <button
         onClick={() => !isDisabled && onGenerate(selectedStyle)}
         disabled={isDisabled}
+        className={!isDisabled ? 'shimmer-hover' : ''}
         style={{
           width: '100%',
-          height: '48px',
+          height: '50px',
           borderRadius: '14px',
           border: 'none',
           cursor: isDisabled ? 'not-allowed' : 'pointer',
           fontFamily: '"DM Sans", sans-serif',
           fontSize: '13px',
           fontWeight: 700,
-          letterSpacing: '0.02em',
+          letterSpacing: '0.03em',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -138,18 +139,18 @@ export function ImageGenerator({
           ...(isRateLimited
             ? {
                 background: 'rgba(255,255,255,0.04)',
-                color: 'rgba(255,255,255,0.30)',
+                color: 'rgba(255,255,255,0.28)',
                 border: '1px solid rgba(255,255,255,0.08)',
               }
             : isDisabled
             ? {
-                background: 'rgba(139,92,246,0.15)',
-                color: 'rgba(255,255,255,0.30)',
+                background: 'rgba(139,92,246,0.12)',
+                color: 'rgba(255,255,255,0.24)',
               }
             : {
-                background: 'linear-gradient(135deg, #8B5CF6 0%, #A855F7 50%, #EC4899 100%)',
+                background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 45%, #DB2777 100%)',
                 color: '#fff',
-                boxShadow: '0 4px 24px rgba(139,92,246,0.35), 0 1px 0 rgba(255,255,255,0.12) inset',
+                boxShadow: '0 4px 28px rgba(139,92,246,0.45), 0 2px 8px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.16)',
               }),
         }}
       >

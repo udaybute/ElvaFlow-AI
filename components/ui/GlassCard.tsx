@@ -1,16 +1,15 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ReactNode } from 'react';
+import { ReactNode, HTMLAttributes } from 'react';
 
-interface GlassCardProps {
+interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
-  className?: string;
   hover?: boolean;
   glow?: boolean;
 }
 
-export function GlassCard({ children, className, hover = false, glow = false }: GlassCardProps) {
+export function GlassCard({ children, className, hover = false, glow = false, ...rest }: GlassCardProps) {
   return (
     <div
       className={cn(
@@ -20,6 +19,7 @@ export function GlassCard({ children, className, hover = false, glow = false }: 
         glow && 'shadow-[0_8px_32px_oklch(0_0_0/32%),inset_0_1px_0_oklch(1_0_0/8%),0_0_40px_oklch(0.65_0.22_265/8%)]',
         className
       )}
+      {...rest}
     >
       {children}
     </div>

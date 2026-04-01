@@ -28,7 +28,15 @@ export function PostHistory({ history, onRestore, onRefresh }: PostHistoryProps)
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
     >
-      <GlassCard>
+      <GlassCard
+        style={{
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.018))',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '20px',
+          backdropFilter: 'blur(28px) saturate(200%)',
+          boxShadow: '0 8px 48px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.07)',
+        }}
+      >
         {/* Accordion toggle */}
         <button
           onClick={() => setIsOpen((v) => !v)}

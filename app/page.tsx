@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Sparkles, X, AlertCircle } from 'lucide-react';
+import { Zap, Sparkles, X, AlertCircle, TrendingUp, Pencil, ImageIcon, Download } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { InputForm } from '@/components/InputForm';
 import { OutputPreview } from '@/components/OutputPreview';
@@ -132,11 +132,21 @@ export default function Home() {
       />
 
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-white/6 bg-[oklch(0.09_0.02_265/85%)] backdrop-blur-xl">
+      <header className="sticky top-0 z-20 border-b border-white/6 bg-[oklch(0.09_0.02_265/90%)] backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-[0_0_16px_oklch(0.65_0.22_265/40%)]">
-              <Zap className="h-4 w-4 text-white" />
+            {/* Logo with animated pulse ring */}
+            <div className="relative flex-shrink-0">
+              <div
+                className="absolute inset-0 rounded-xl"
+                style={{
+                  background: 'oklch(0.65 0.22 265 / 35%)',
+                  animation: 'logo-ring-pulse 3s ease-in-out infinite',
+                }}
+              />
+              <div className="relative h-9 w-9 rounded-xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-[0_0_24px_oklch(0.65_0.22_265/55%)]">
+                <Zap className="h-4 w-4 text-white" />
+              </div>
             </div>
             <div>
               <h1 className="text-base font-extrabold gradient-text-blue leading-none tracking-tight">ElvaFlow AI</h1>
@@ -145,7 +155,7 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-green-400 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1.5">
+            <span className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1.5 shadow-[0_0_12px_rgba(52,211,153,0.15)]">
               <Sparkles className="h-3 w-3" />
               100% Free
             </span>
@@ -157,14 +167,14 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-12 pb-8 text-center">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-10 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-4"
+          className="space-y-5"
         >
-          <div className="inline-flex items-center gap-2 text-xs font-semibold bg-primary/10 border border-primary/20 text-primary rounded-full px-4 py-1.5">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold bg-primary/10 border border-primary/25 text-primary rounded-full px-4 py-1.5 badge-pulse">
             <Sparkles className="h-3 w-3" />
             AI-Powered LinkedIn Content
           </div>
@@ -172,9 +182,28 @@ export default function Home() {
             Generate LinkedIn Posts{' '}
             <span className="gradient-text">with AI</span>
           </h2>
-          <p className="text-white/45 text-base max-w-lg mx-auto leading-relaxed">
-            3 unique variations · engagement scoring · editable preview · banner creator — all free.
+          <p className="text-white/45 text-base max-w-xl mx-auto leading-relaxed">
+            From idea to polished post in seconds — AI-generated variations, engagement scoring, live preview &amp; banner creator.
           </p>
+
+          {/* Feature pills */}
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+            {([
+              { icon: <Sparkles className="h-2.5 w-2.5" />, label: '3 Variations',      color: 'text-violet-400' },
+              { icon: <TrendingUp className="h-2.5 w-2.5" />, label: 'Engagement Score', color: 'text-blue-400'   },
+              { icon: <Pencil className="h-2.5 w-2.5" />,    label: 'Editable Preview', color: 'text-indigo-400' },
+              { icon: <ImageIcon className="h-2.5 w-2.5" />, label: 'Banner Creator',   color: 'text-pink-400'   },
+              { icon: <Download className="h-2.5 w-2.5" />,  label: 'Export PNG',       color: 'text-emerald-400'},
+            ] as { icon: React.ReactNode; label: string; color: string }[]).map((f) => (
+              <span
+                key={f.label}
+                className={`inline-flex items-center gap-1.5 text-[11px] font-medium bg-white/[0.03] border border-white/[0.07] rounded-full px-3 py-1 ${f.color}`}
+              >
+                {f.icon}
+                {f.label}
+              </span>
+            ))}
+          </div>
         </motion.div>
       </section>
 
@@ -243,8 +272,11 @@ export default function Home() {
         </div>
       </main>
 
-      <footer className="text-center pb-8 text-[11px] text-white/20">
-        ElvaFlow AI by Elvatrixa · Built with Next.js, Groq &amp; Canvas · Zero Cost Architecture
+      <footer className="text-center pb-10 pt-4 space-y-1.5">
+        <p className="text-[11px] text-white/20">
+          ElvaFlow AI by Elvatrixa · Built with Next.js, Groq &amp; Canvas API
+        </p>
+        <p className="text-[10px] text-white/10 tracking-widest uppercase">Zero Cost Architecture</p>
       </footer>
     </div>
   );

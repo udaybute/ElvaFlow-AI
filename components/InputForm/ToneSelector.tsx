@@ -3,6 +3,14 @@
 import { POST_TONES, POST_LENGTHS } from '@/lib/constants';
 import { PostTone, PostLength } from '@/types';
 
+const TONE_ICONS: Record<string, string> = {
+  'professional':   '🎯',
+  'conversational': '💬',
+  'inspiring':      '✨',
+  'storytelling':   '📜',
+  'analytical':     '📊',
+};
+
 interface ToneSelectorProps {
   tone: PostTone;
   length: PostLength;
@@ -66,6 +74,7 @@ export function ToneSelector({ tone, length, onToneChange, onLengthChange }: Ton
                   }
                 }}
               >
+                <span style={{ fontSize: '12px', lineHeight: 1 }}>{TONE_ICONS[t.value]}</span>
                 {t.label}
               </button>
             );
