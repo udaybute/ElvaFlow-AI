@@ -123,7 +123,6 @@ export function ImageGenerator({
           width: '100%',
           height: '50px',
           borderRadius: '14px',
-          border: 'none',
           cursor: isDisabled ? 'not-allowed' : 'pointer',
           fontFamily: '"DM Sans", sans-serif',
           fontSize: '13px',
@@ -146,10 +145,12 @@ export function ImageGenerator({
             ? {
                 background: 'rgba(139,92,246,0.12)',
                 color: 'rgba(255,255,255,0.24)',
+                border: 'none',
               }
             : {
                 background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 45%, #DB2777 100%)',
                 color: '#fff',
+                border: 'none',
                 boxShadow: '0 4px 28px rgba(139,92,246,0.45), 0 2px 8px rgba(139,92,246,0.25), inset 0 1px 0 rgba(255,255,255,0.16)',
               }),
         }}
